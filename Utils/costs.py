@@ -5,11 +5,11 @@ import numpy as np
 
 def compute_loss(y, tx, w, loss_function='mse'):
     """
-    :param y:
-    :param tx:
-    :param w:
-    :param loss_function:
-    :return:
+    :param y: labels
+    :param tx: features
+    :param w: weights
+    :param loss_function: Which loss function to use (mse or mae for now) 
+    :return: Computed loss
     """
     e = y - tx @ w
     N = len(y)
