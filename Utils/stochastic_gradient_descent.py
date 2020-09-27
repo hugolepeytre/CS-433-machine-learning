@@ -9,25 +9,26 @@ from costs import *
 def compute_stoch_gradient(y, tx, w, loss_function='mse'):
     """
 
-    :param y:
-    :param tx:
-    :param w:
-    :param loss_function:
-    :return:
+    :param y: Labels
+    :param tx: Feature points
+    :param w: Weights
+    :param loss_function: Which loss function to use (mse or mae for now)
+    :return: Gradient vector
     """
     return gradient_descent(y, tx, w, loss_function)
 
 
-def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
+def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma, loss_function='mse'):
     """
 
-    :param y:
-    :param tx:
-    :param initial_w:
-    :param batch_size:
-    :param max_iters:
-    :param gamma:
-    :return:
+    :param y: Labels
+    :param tx: Feature points
+    :param initial_w: Initial weights
+    :param batch_size: Size of random subsets of features at each step
+    :param max_iters: Number of iterations of gradient descent
+    :param gamma: Step size
+    :param loss_function: loss_function: Which loss function to use (mse or mae for now)
+    :return: History of losses and weights through descent
     """
     ws = [initial_w]
     losses = []
@@ -35,8 +36,8 @@ def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
     for n_iter in range(max_iters):
         loss = 0
         for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=1):
-            loss = compute_loss(y_batch, tx_batch, w)
-            grad = compute_stoch_gradient(y_batch, tx_batch, w)
+            loss = compute_loss(y_batch, tx_batch, w, loss_function)
+            grad = compute_stoch_gradient(y_batch, tx_batch, w, loss_function)
             w = w - gamma * grad
         ws.append(w)
         losses.append(loss)

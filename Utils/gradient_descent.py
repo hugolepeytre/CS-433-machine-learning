@@ -6,11 +6,11 @@ from costs import *
 def compute_gradient(y, tx, w, loss_function='mse'):
     """
 
-    :param y:
-    :param tx:
-    :param w:
-    :param loss_function:
-    :return:
+    :param y: Labels
+    :param tx: Feature points
+    :param w: Weights
+    :param loss_function: Which loss function to use (mse or mae for now)
+    :return: Gradient vector
     """
     e = y - tx @ w
     N = len(y)
@@ -23,13 +23,13 @@ def compute_gradient(y, tx, w, loss_function='mse'):
 def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_function='mse'):
     """
 
-    :param y:
-    :param tx:
-    :param initial_w:
-    :param max_iters:
-    :param gamma:
-    :param loss_function:
-    :return:
+    :param y: Labels
+    :param tx: Feature points
+    :param initial_w: Initial weights
+    :param max_iters: Number of iterations of gradient descent
+    :param gamma: Step size
+    :param loss_function: loss_function: Which loss function to use (mse or mae for now)
+    :return: History of losses and weights through descent
     """
     ws = [initial_w]
     losses = []
