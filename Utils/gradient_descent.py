@@ -27,7 +27,7 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_function='mse'):
     :param tx: Feature points
     :param initial_w: Initial weights
     :param max_iters: Number of iterations of gradient descent
-    :param gamma: Step size
+    :param gamma: Learning Rate
     :param loss_function: loss_function: Which loss function to use (mse or mae for now)
     :return: History of losses and weights through descent
     """
