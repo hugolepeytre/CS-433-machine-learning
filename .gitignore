@@ -1,2 +1,4 @@
 .idea
 .DS_Store
+train.csv
+test.csv
