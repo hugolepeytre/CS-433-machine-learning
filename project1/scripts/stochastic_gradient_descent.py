@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Stochastic Gradient Descent"""
 
-from gradient_descent import *
-from helpers import *
-from costs import *
+from .gradient_descent import *
+from .helpers import *
+from .costs import *
 
 
 def compute_stoch_gradient(y, tx, w, loss_function='mse'):

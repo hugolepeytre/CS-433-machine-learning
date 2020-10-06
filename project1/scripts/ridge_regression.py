@@ -1,6 +1,14 @@
-import numpy as np
+from .costs import *
+
 
 def ridge_regression(y, tx, lambda_):
-    """implement ridge regression."""
+    """
+
+    :param y: Labels
+    :param tx: Feature points
+    :param lambda_: Regularization parameter
+    :return: (w, loss), the optimal weight vector found, and the training loss
+    """
     lambda_p = 2 * len(y) * lambda_
-    return np.linalg.inv(tx.T @ tx + lambda_p * np.identity(tx.shape[1])) @ tx.T @ y
+    w = np.linalg.solve(tx.T @ tx + lambda_p, tx.T @ y)
+    return w, compute_loss(y, tx, w)

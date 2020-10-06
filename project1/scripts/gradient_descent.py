@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Gradient Descent"""
-from costs import *
+from .costs import *
 
 
 def compute_gradient(y, tx, w, loss_function='mse'):

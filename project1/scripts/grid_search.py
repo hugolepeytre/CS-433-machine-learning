@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Grid Search"""
 
-from costs import *
+from .costs import *
+import numpy as np
 
 
 def generate_w(num_intervals):
