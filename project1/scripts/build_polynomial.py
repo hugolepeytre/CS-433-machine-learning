@@ -13,3 +13,13 @@ def build_poly(x, degree):
     """
     poly = [[y**i for i in range(degree + 1)] for y in x]
     return np.array(poly)
+
+
+def build_poly_2D(x, degree):
+    """
+    Same as above but x is a matrix
+    :param x: Matrix of values to raise to the powers of 0 to degree
+    :param degree: Maximum power to raise x to
+    :return: Matrix of dimensions (x.shape[0], x.shape[1] * (degree + 1))
+    """
+    return np.hstack([build_poly(column, degree) for column in x.T])
