@@ -1,4 +1,4 @@
-from .costs import *
+from costs import *
 
 
 def ridge_regression(y, tx, lambda_):

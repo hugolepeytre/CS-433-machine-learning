@@ -1,4 +1,4 @@
-from .costs import *
+from costs import *
 
 
 def least_squares(y, tx):
