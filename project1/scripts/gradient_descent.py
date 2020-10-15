@@ -15,7 +15,6 @@ def compute_gradient(y, tx, w, loss_function='mse'):
     e = y - tx @ w
     N = len(y)
     if loss_function == 'mse':
-        print(-tx.T @ e / N)
         return -tx.T @ e / N
     else:
         return -tx.T @ np.sign(e) / N

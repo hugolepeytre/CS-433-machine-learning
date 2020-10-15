@@ -39,10 +39,9 @@ def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma, 
             loss = compute_loss(y_batch, tx_batch, w, loss_function)
             grad = compute_stoch_gradient(y_batch, tx_batch, w, loss_function)
             w = w - gamma * grad
-            print(np.linalg.norm(grad))
         ws.append(w)
         losses.append(loss)
-        # print("Stochastic Gradient Descent({bi}/{ti}): loss={lo}, w0={w0}, w1={w1}".format(
-        #     bi=n_iter, ti=max_iters - 1, lo=loss, w0=w[0], w1=w[1]))
+        print("Stochastic Gradient Descent({bi}/{ti}): loss={lo}, w0={w0}, w1={w1}".format(
+            bi=n_iter, ti=max_iters - 1, lo=loss, w0=w[0], w1=w[1]))
 
     return losses, ws
