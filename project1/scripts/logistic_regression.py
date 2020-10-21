@@ -9,15 +9,17 @@ def sigmoid(t):
 
 def calculate_loss(y, tx, w):
     """compute the loss: negative log likelihood."""
+    N = len(y)
     prediction = tx @ w
     sum_logs = np.log(np.exp(prediction) + 1).sum()
     error = -y.T @ prediction
-    return sum_logs + error
+    return (sum_logs + error)/N
 
 
 def calculate_gradient(y, tx, w):
     """compute the gradient of loss."""
-    return tx.T @ (sigmoid(tx @ w) - y)
+    N = len(y)
+    return (tx.T @ (sigmoid(tx @ w) - y))/N
 
 
 def gradient_descent_step(y, tx, w, gamma):
@@ -28,7 +30,6 @@ def gradient_descent_step(y, tx, w, gamma):
     loss = calculate_loss(y, tx, w)
     grad = calculate_gradient(y, tx, w)
     w = w - gamma*grad
-    #print("Maximum weight : ", round(w.max()), " Minimum weight : ", round(w.min()))
     return loss, w
 
 
@@ -42,10 +43,12 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     :param gamma:
     :return:
     """
-    batch_size = 100
+    batch_size = 1000
     w = initial_w
     loss = 0
     for i in range(max_iters):
         for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=1):
             loss, w = gradient_descent_step(y_batch, tx_batch, w, gamma)
+        if i % 10 == 0:
+            print("Loss iteration {} : {}".format(i, loss))
     return w, loss
