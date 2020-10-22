@@ -60,7 +60,14 @@ def remove_outliers(y, tX, ids):
     IQR = Q3 - Q1
     mask = (tX_copy >= Q1 - 1.5 * IQR) & (tX_copy <= Q3 + 1.5 * IQR) # set to True any entry outside the interquartile range
 
-    row_mask = mask.all(axis=1) #sets to False rows containing any outliers
+    #Only filter out features with values that are spread over a range bigger than threshold_range
+    # i.e. if the difference between the minimum value and the maximum value is bigger than threshold_range
+    threshold_range = 10
+    col_mask = (tX.max(axis=0) - tX.min(axis=0)) < threshold_range #set to False any feature with range bigger than threshold
+    mask = mask | col_mask
+    row_mask = mask.all(axis=1) #sets to False rows containing any outliers    
+
+
     return y_copy[row_mask], tX_copy[row_mask], ids_copy[row_mask]
 
 

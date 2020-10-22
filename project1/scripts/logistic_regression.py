@@ -41,6 +41,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     for i in range(max_iters):
         for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=1):
             loss, w = gradient_descent_step(y_batch, tx_batch, w, gamma)
-        if i % 10 == 0:
-            print("Loss iteration {} : {}".format(i, loss))
+        # if i % 10 == 0:
+        #     print("Loss iteration {} : {}".format(i, loss))
     return w, loss
