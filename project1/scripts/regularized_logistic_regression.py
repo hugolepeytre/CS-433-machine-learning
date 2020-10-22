@@ -1,27 +1,22 @@
 from helpers import *
 from costs import *
+from logistic_regression import *
 
-
-def sigmoid(t):
-    """apply the sigmoid function on t."""
-    inv_exp = np.exp(-t)
-    return 1/(inv_exp+1)
-
-
-def calculate_gradient(y, tx, w):
-    """compute the gradient of loss."""
-    N = len(y)
-    return (tx.T @ (sigmoid(tx @ w) - y))/N
-
+def calculate_hessian(y, tx, w):
+    """return the Hessian of the loss function."""
+    pred = np.squeeze(sigmoid(tx @ w))
+    S = np.diag((pred * (1 - pred)))
+    return tx.T @ S @ tx
 
 def gradient_descent_step(y, tx, w, gamma, lambda_):
     """
-    Do one step of gradient descent using logistic regression.
+    Do one step of gradient descent using regularized logistic regression.
     Return the loss and the updated w.
     """
-    loss = compute_log_likelihood(y, tx, w) + (w.T @ w)*lambda_/2
+    loss = compute_log_likelihood(y, tx, w) + np.linalg.norm(w) * lambda_ / 2
     grad = calculate_gradient(y, tx, w) + lambda_*w
-    w = w - gamma*grad
+    hess = calculate_hessian(y, tx, w) + lambda_
+    w = w - gamma * np.linalg.inv(hess) @ grad
     return loss, w
 
 

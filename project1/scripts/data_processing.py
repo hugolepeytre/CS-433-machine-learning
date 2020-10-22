@@ -135,18 +135,18 @@ def remove_correlated_features(tX, handpicked=-1, threshold=0.9):
 
 
 def clean_training(y, tX, ids):
-    tX_nan = set_nan(tX)
-    tX_columns = remove_empty_columns(tX_nan, threshold=2) #temporary to 2 to not remove any column
-    y_filtered, tX_filtered, ids_filtered = filter_nan(y, tX_columns, ids)
-    y_outliers, tX_outliers, ids_outliers = remove_outliers(y_filtered, tX_filtered, ids_filtered)
-    tX_scale = scale(tX_outliers, method="standard")[0]
-    tX_corr = remove_correlated_features(tX_scale, handpicked=29, threshold=0.9)
-    return y_outliers, tX_corr, ids_outliers
+    tX = set_nan(tX)
+    tX = remove_empty_columns(tX, threshold=2) #temporary to 2 to not remove any column
+    y, tX, ids = filter_nan(y, tX, ids, remove=False, replace_val=0.0)
+    y, tX, ids = remove_outliers(y, tX, ids)
+    tX = scale(tX, method="standard")[0]
+    # tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
+    return y, tX, ids
 
 def clean_test(y, tX, ids):
-    tX_nan = set_nan(tX)
-    tX_columns = remove_empty_columns(tX_nan, threshold=2) #temporary to 2 to not remove any column
-    y_filtered, tX_filtered, ids_filtered = filter_nan(y, tX_columns, ids, remove=False, replace_val=0.0)
-    tX_scale = scale(tX_filtered, method="standard", tX_test=tX_filtered)[1]
-    tX_corr = remove_correlated_features(tX_scale, handpicked=29, threshold=0.9)
-    return y, tX_corr, ids
+    tX = set_nan(tX)
+    tX = remove_empty_columns(tX_nan, threshold=2) #temporary to 2 to not remove any column
+    y, tX, ids = filter_nan(y, tX_columns, ids, remove=False, replace_val=0.0)
+    tX = scale(tX, method="standard", tX_test=tX)[1]
+    tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
+    return y, tX, ids
