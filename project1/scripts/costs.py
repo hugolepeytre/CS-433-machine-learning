@@ -19,3 +19,12 @@ def compute_loss(y, tx, w, loss_function='mse'):
         return e @ e / (2 * N)
     else:
         return np.abs(e).mean()
+
+
+def compute_log_likelihood(y, tx, w):
+    """compute the loss: negative log likelihood."""
+    N = len(y)
+    prediction = tx @ w
+    sum_logs = np.log(np.exp(prediction) + 1).sum()
+    error = -y.T @ prediction
+    return (sum_logs + error)/N
