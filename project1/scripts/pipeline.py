@@ -9,7 +9,7 @@ from build_polynomial import build_poly_2D
 from costs import *
 
 
-def model_data(y, tx, model, initial_w=0, max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1):
+def model_data(y, tx, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1):
     """
 
     :param y:
@@ -22,7 +22,7 @@ def model_data(y, tx, model, initial_w=0, max_iters=1000, gamma=0.1, lambda_=0.1
     :param poly_exp: If above one, expand the data
     :return:
     """
-    if initial_w == 0:
+    if len(initial_w) == 0:
         initial_w = np.zeros(tx.shape[1])
     w = 0
     loss = 0
@@ -43,7 +43,6 @@ def model_data(y, tx, model, initial_w=0, max_iters=1000, gamma=0.1, lambda_=0.1
     elif model == 'regularized_logistic_regression':
         y = y/2 + 0.5
         w, loss = reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma)
-
     return w, loss
 
 
@@ -52,4 +51,5 @@ def get_loss(y, tx, w):
 
 
 def get_log_likelihood(y, tx, w):
+    y = y/2 + 0.5
     return compute_log_likelihood(y, tx, w)
