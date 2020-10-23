@@ -16,12 +16,14 @@ def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, in
         for k in range(k_fold):
             if param == 'max_iters':
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, v, gamma, lambda_, poly_exp)
-            if param == 'gamma':
+            elif param == 'gamma':
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, v, lambda_, poly_exp)
-            if param == 'lambda_':
+            elif param == 'lambda_':
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, v, poly_exp)
-            if param == 'poly_exp':
+            elif param == 'poly_exp':
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, lambda_, v)
+            else:
+                raise ValueError('Invalid parameter')
             loss_t_avg += loss_t
             loss_v_avg += loss_v
         losses_t.append(loss_t_avg/k_fold)

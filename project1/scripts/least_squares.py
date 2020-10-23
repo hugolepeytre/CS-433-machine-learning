@@ -9,5 +9,6 @@ def least_squares(y, tx):
     :return: (w, loss), the optimal weight vector found, and the training loss
     """
     
-    w = np.linalg.solve(tx.T @ tx, tx.T @ y)
+    w, _, r, _ = np.linalg.lstsq(tx.T @ tx, tx.T @ y, rcond=None)
+    print("Matrix X^TX has rank ", r)
     return w, compute_loss(y, tx, w)

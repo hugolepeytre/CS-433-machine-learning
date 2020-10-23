@@ -29,7 +29,7 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, loss_functio
     :param loss_function: loss_function: Which loss function to use (mse or mae for now)
     :return: History of losses and weights through descent
     """
-    batch_size = 10000
+    batch_size = 500
     ws = []
     losses = []
     w = initial_w

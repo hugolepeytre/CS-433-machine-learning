@@ -38,9 +38,17 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     batch_size = 1000
     w = initial_w
     loss = 0
-    for i in range(max_iters):
-        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=1):
+    # batch_iter can only send out each element once, so for a big amount of iterations or big batches, we have to
+    # repeat the function call
+    max_num_batches = y.shape[0]//batch_size
+    if max_iters <= max_num_batches:
+        n_batches = max_iters
+        iterations = 1
+    else:
+        n_batches = max_num_batches
+        iterations = max_iters//n_batches
+
+    for i in range(iterations):
+        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=n_batches):
             loss, w = gradient_descent_step(y_batch, tx_batch, w, gamma)
-        # if i % 10 == 0:
-        #     print("Loss iteration {} : {}".format(i, loss))
     return w, loss
