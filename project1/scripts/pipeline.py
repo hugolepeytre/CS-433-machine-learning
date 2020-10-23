@@ -43,6 +43,8 @@ def model_data(y, tx, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.
     elif model == 'regularized_logistic_regression':
         y = y/2 + 0.5
         w, loss = reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma)
+    else:
+        raise ValueError('Invalid model')
     return w, loss
 
 
