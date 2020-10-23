@@ -4,6 +4,26 @@ import matplotlib.pyplot as plt
 
 def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, initial_w=[], max_iters=1000, gamma=0.1,
                         lambda_=0.1, poly_exp=1, seed=1):
+    """
+
+    :param y: Labels
+    :param tx: Feature vector
+    :param model: Which machine learning model to use, argument should be the name as a string
+    (available : gradient_descent, stochastic_gradient_descent, least_squares, ridge_regression,
+    logistic_regression, regularized_logistic_regression)
+    :param param: Which parameter to optimize, argument should be the name as a string
+    (available : max_iters, lambda_, gamma, poly_exp)
+    :param values: The parameter's values to try
+    :param logspace: For visualisation, set to False if values are on a linear scale, false if they are on a log scale
+    :param k_fold: Number of subsets in which to divide the data
+    :param initial_w: Initial weight vector
+    :param max_iters: Number of iterations
+    :param gamma: Learning rate
+    :param lambda_: Regularization parameter
+    :param poly_exp: Maximum degree to which to raise the features
+    :param seed: Random seed
+    :return: The training and validation losses for this instance of cross-validation
+    """
     # split data in k fold
     k_indices = build_k_indices(y.shape[0], k_fold, seed)
     # define lists to store the loss of training data and test data
@@ -35,7 +55,13 @@ def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, in
 
 
 def build_k_indices(N, k_fold, seed=1):
-    """build k indices for k-fold."""
+    """
+    Creates a set of k splits from a randomly shuffled range
+    :param N: Number of elements
+    :param k_fold: Number of splits
+    :param seed: Random seed
+    :return: An array of k arrays of indices, in random order
+    """
     interval = int(N / k_fold)
     np.random.seed(seed)
     indices = np.random.permutation(N)
@@ -45,7 +71,20 @@ def build_k_indices(N, k_fold, seed=1):
 
 
 def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1):
-    """return the loss of ridge regression."""
+    """
+    Computes losses for one split of training data
+    :param y: Labels
+    :param tx: Feature vector
+    :param k_indices: Set of k splits in the data
+    :param k: Index of the split which will be the training set
+    :param model: Machine learning model to use
+    :param initial_w: Initial weight vector
+    :param max_iters: Number of iterations
+    :param gamma: Learning rate
+    :param lambda_: Regularization parameter
+    :param poly_exp: Maximum degree to which to raise the features
+    :return: The training and validation losses for this instance of cross-validation
+    """
     # k-th group is test, the rest is train
     if poly_exp > 1:
         tx = build_poly_2D(tx, poly_exp)
@@ -66,7 +105,14 @@ def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, g
 
 
 def cross_validation_visualization(values, losses_t, losses_v, logspace=True):
-    """visualization the curves of mse_tr and mse_te."""
+    """
+    Visualizes the training and validation error for all tested parameters
+    :param values: Tested parameters
+    :param losses_t: Training losses
+    :param losses_v: Validation losses
+    :param logspace: If false, tested values are on a linear scale. Else they are on a log scale
+    :return:
+    """
     plt.figure()
     if logspace:
         plt.semilogx(values, losses_t, marker=".", color='b', label='Train error')

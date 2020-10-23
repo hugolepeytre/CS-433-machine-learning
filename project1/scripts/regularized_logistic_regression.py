@@ -16,14 +16,14 @@ def gradient_descent_step(y, tx, w, gamma, lambda_):
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
-
-    :param y:
-    :param tx:
-    :param lambda_:
-    :param initial_w:
-    :param max_iters:
-    :param gamma:
-    :return:
+    Trains a regularized logistic regression model
+    :param y: Labels
+    :param tx: Feature points
+    :param lambda_: Regularization parameter
+    :param initial_w: Initial weight vector
+    :param max_iters: Number of iterations of gradient descent
+    :param gamma: Learning rate
+    :return: The last weight/loss pair
     """
     batch_size = 1000
     w = initial_w

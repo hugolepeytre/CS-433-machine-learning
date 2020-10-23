@@ -11,19 +11,19 @@ from costs import *
 
 def model_data(y, tx, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1):
     """
-
-    :param y:
-    :param tx:
-    :param model: Which machine learning model to use
-    :param initial_w:
-    :param max_iters:
-    :param gamma:
-    :param lambda_:
-    :param poly_exp: If above one, expand the data
-    :return:
+    How to use : Specify the machine learning model to use, and give the necessary parameters as named arguments
+    :param y: Labels
+    :param tx: Feature points
+    :param model: Which machine learning model to use, argument should be the name as a string
+    (available : gradient_descent, stochastic_gradient_descent, least_squares, ridge_regression,
+    logistic_regression, regularized_logistic_regression)
+    :param initial_w: Initial weights. Defaults to zeroes
+    :param max_iters: number of iterations
+    :param gamma: learning rate
+    :param lambda_: Regularization parameter
+    :param poly_exp: If above 1, what degree to raise the features to
+    :return: the last weight vector, and loss
     """
-    w = 0
-    loss = 0
     if poly_exp > 1:
         tx = build_poly_2D(tx, poly_exp)
 
@@ -50,9 +50,16 @@ def model_data(y, tx, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.
 
 
 def get_loss(y, tx, w):
+    """
+    Returns the mse
+    """
     return compute_loss(y, tx, w)
 
 
 def get_log_likelihood(y, tx, w):
+    """
+    Returns the negative log-likelihood
+    Takes care of the change in labels from {-1,-1} to {0,1}
+    """
     y = y/2 + 0.5
     return compute_log_likelihood(y, tx, w)

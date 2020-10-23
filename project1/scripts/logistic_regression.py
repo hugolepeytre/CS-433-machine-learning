@@ -28,12 +28,12 @@ def gradient_descent_step(y, tx, w, gamma):
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
 
-    :param y:
-    :param tx:
-    :param initial_w:
-    :param max_iters:
-    :param gamma:
-    :return:
+    :param y: Labels
+    :param tx: Feature points
+    :param initial_w: Initial weight vector
+    :param max_iters: Number of iterations of gradient descent
+    :param gamma: Learning rate
+    :return: The last weight/loss pair
     """
     batch_size = 1000
     w = initial_w

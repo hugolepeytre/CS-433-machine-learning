@@ -27,7 +27,7 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, loss_functio
     :param max_iters: Number of iterations of gradient descent
     :param gamma: Learning Rate
     :param loss_function: loss_function: Which loss function to use (mse or mae for now)
-    :return: History of losses and weights through descent
+    :return: Last weight/loss pair
     """
     batch_size = 500
     ws = []
