@@ -22,12 +22,13 @@ def model_data(y, tx, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.
     :param poly_exp: If above one, expand the data
     :return:
     """
-    if len(initial_w) == 0:
-        initial_w = np.zeros(tx.shape[1])
     w = 0
     loss = 0
     if poly_exp > 1:
         tx = build_poly_2D(tx, poly_exp)
+
+    if len(initial_w) == 0:
+        initial_w = np.zeros(tx.shape[1])
 
     if model == 'gradient_descent':
         w, loss = gradient_descent(y, tx, initial_w, max_iters, gamma)

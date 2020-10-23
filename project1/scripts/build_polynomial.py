@@ -11,8 +11,12 @@ def build_poly(x, degree):
     :param degree: Maximum power to raise x to
     :return: Matrix of dimensions (len(x), degree + 1), with column i being x^i
     """
-    poly = [[y**i for i in range(degree + 1)] for y in x]
-    return np.array(poly)
+    result = np.ones(len(x))
+    current = np.ones(len(x))
+    for i in range(degree):
+        current = current*x
+        result = np.vstack([result, current])
+    return result.T
 
 
 def build_poly_2D(x, degree):

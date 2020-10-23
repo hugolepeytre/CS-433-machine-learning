@@ -1,11 +1,11 @@
 from pipeline import *
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
-def find_best_parameter(y, tx, model, param, values, logspace=True, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1, seed=1):
-    k_fold = 4
+def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, initial_w=[], max_iters=1000, gamma=0.1,
+                        lambda_=0.1, poly_exp=1, seed=1):
     # split data in k fold
-    k_indices = build_k_indices(y, k_fold, seed)
+    k_indices = build_k_indices(y.shape[0], k_fold, seed)
     # define lists to store the loss of training data and test data
     losses_t = []
     losses_v = []
@@ -22,14 +22,14 @@ def find_best_parameter(y, tx, model, param, values, logspace=True, initial_w=[]
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, v, poly_exp)
             if param == 'poly_exp':
                 loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, lambda_, v)
-            loss_t_avg += np.sqrt(2*loss_t)
-            loss_v_avg += np.sqrt(2*loss_v)
+            loss_t_avg += loss_t
+            loss_v_avg += loss_v
         losses_t.append(loss_t_avg/k_fold)
         losses_v.append(loss_v_avg/k_fold)
 
     cross_validation_visualization(values, losses_t, losses_v, logspace=logspace)
-    best_value = values[np.argmax(losses_v)]
-    return best_value
+    best_index = np.argmin(losses_v)
+    return values[best_index], losses_v[best_index]
 
 
 def build_k_indices(N, k_fold, seed=1):
@@ -45,6 +45,8 @@ def build_k_indices(N, k_fold, seed=1):
 def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, gamma=0.1, lambda_=0.1, poly_exp=1):
     """return the loss of ridge regression."""
     # k-th group is test, the rest is train
+    if poly_exp > 1:
+        tx = build_poly_2D(tx, poly_exp)
     testing_indices = k_indices[k]
     training_indices = [idx for subgroup in np.vstack((k_indices[:k], k_indices[k+1:])) for idx in subgroup]
     tx_v = tx[testing_indices]
@@ -52,9 +54,9 @@ def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, g
     tx_t = tx[training_indices]
     y_t = y[training_indices]
     # Model the data
-    w, loss_t = model_data(y_t, tx_t, model, initial_w, max_iters, gamma, lambda_, poly_exp)
+    w, loss_t = model_data(y_t, tx_t, model, initial_w, max_iters, gamma, lambda_)
     # Validation loss
-    if model.contains('logistic'):
+    if 'logistic' in model:
         loss_v = get_log_likelihood(y_v, tx_v, w)
     else:
         loss_v = get_loss(y_v, tx_v, w)

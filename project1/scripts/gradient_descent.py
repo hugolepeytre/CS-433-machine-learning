@@ -31,7 +31,7 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_function='mse'):
     :param loss_function: loss_function: Which loss function to use (mse or mae for now)
     :return: History of losses and weights through descent
     """
-    ws = [initial_w]
+    ws = []
     losses = []
     w = initial_w
     for n_iter in range(max_iters):
@@ -40,7 +40,5 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_function='mse'):
         w = w - gamma * grad
         ws.append(w)
         losses.append(loss)
-        # print("Gradient Descent({bi}/{ti}): loss={lo}, w0={w0}, w1={w1}".format(
-        #     bi=n_iter, ti=max_iters - 1, lo=loss, w0=w[0], w1=w[1]))
 
-    return losses[-1], ws[-1]
+    return ws[-1], losses[-1]

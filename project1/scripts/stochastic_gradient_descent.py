@@ -29,19 +29,26 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, loss_functio
     :param loss_function: loss_function: Which loss function to use (mse or mae for now)
     :return: History of losses and weights through descent
     """
-    batch_size = 100
-    ws = [initial_w]
+    batch_size = 10000
+    ws = []
     losses = []
     w = initial_w
-    for n_iter in range(max_iters):
-        loss = 0
-        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=1):
+    # batch_iter can only send out each element once, so for a big amount of iterations or big batches, we have to
+    # repeat the function call
+    max_num_batches = y.shape[0]//batch_size
+    if max_iters <= max_num_batches:
+        n_batches = max_iters
+        iterations = 1
+    else:
+        n_batches = max_num_batches
+        iterations = max_iters//n_batches
+
+    for i in range(iterations):
+        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=n_batches):
             loss = compute_loss(y_batch, tx_batch, w, loss_function)
             grad = compute_stoch_gradient(y_batch, tx_batch, w, loss_function)
             w = w - gamma * grad
-        ws.append(w)
-        losses.append(loss)
-        # print("Stochastic Gradient Descent({bi}/{ti}): loss={lo}, w0={w0}, w1={w1}".format(
-        #     bi=n_iter, ti=max_iters - 1, lo=loss, w0=w[0], w1=w[1]))
+            ws.append(w)
+            losses.append(loss)
 
-    return losses[-1], ws[-1]
+    return ws[-1], losses[-1]
