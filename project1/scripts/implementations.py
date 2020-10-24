@@ -70,7 +70,7 @@ def ridge_regression(y, tx, lambda_):
     :return: (w, loss), the optimal weight vector found, and the training loss
     """
     lambda_p = 2 * len(y) * lambda_
-    w, _, r, _ = np.linalg.lstsq(tx.T @ tx + lambda_p, tx.T @ y, rcond=None)
+    w = np.linalg.solve(tx.T @ tx + (lambda_p*np.eye(tx.shape[1])), tx.T @ y)
     return w, compute_mse(y, tx, w)
 
 
@@ -83,25 +83,13 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     :param gamma: Learning rate
     :return: The last weight/loss pair
     """
-    batch_size = 1000
     w = initial_w
     loss = 0
 
-    # batch_iter can only send out each element once, so for a big amount of iterations or big batches, we have to
-    # repeat the function call
-    max_num_batches = y.shape[0]//batch_size
-    if max_iters <= max_num_batches:
-        n_batches = max_iters
-        iterations = 1
-    else:
-        n_batches = max_num_batches
-        iterations = max_iters//n_batches
-
-    for i in range(iterations):
-        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=n_batches):
-            loss = compute_log_likelihood(y_batch, tx_batch, w)
-            grad = calculate_gradient_neg_log_likelihood(y_batch, tx_batch, w)
-            w = w - gamma*grad
+    for i in range(max_iters):
+        loss = compute_log_likelihood(y, tx, w)
+        grad = calculate_gradient_neg_log_likelihood(y, tx, w)
+        w = w - gamma*grad
     return w, loss
 
 
@@ -116,24 +104,13 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     :param gamma: Learning rate
     :return: The last weight/loss pair
     """
-    batch_size = 1000
     w = initial_w
     loss = 0
-    # batch_iter can only send out each element once, so for a big amount of iterations or big batches, we have to
-    # repeat the function call
-    max_num_batches = y.shape[0]//batch_size
-    if max_iters <= max_num_batches:
-        n_batches = max_iters
-        iterations = 1
-    else:
-        n_batches = max_num_batches
-        iterations = max_iters//n_batches
 
-    for i in range(iterations):
-        for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=n_batches):
-            loss = compute_log_likelihood(y_batch, tx_batch, w) + np.linalg.norm(w) * lambda_ / 2
-            grad = calculate_gradient_neg_log_likelihood(y_batch, tx_batch, w) + lambda_*w
-            w = w - gamma*grad
+    for i in range(max_iters):
+        loss = compute_log_likelihood(y, tx, w) + np.linalg.norm(w) * lambda_ / 2
+        grad = calculate_gradient_neg_log_likelihood(y, tx, w) + lambda_*w
+        w = w - gamma*grad
     return w, loss
 
 
@@ -177,14 +154,12 @@ def sigmoid(t):
 
 def compute_log_likelihood(y, tx, w):
     """compute the negative log likelihood."""
-    N = len(y)
     prediction = tx @ w
     sum_logs = np.log(np.exp(prediction) + 1).sum()
     error = -y.T @ prediction
-    return (sum_logs + error)/N
+    return sum_logs + error
 
 
 def calculate_gradient_neg_log_likelihood(y, tx, w):
     """compute the gradient of the negative log-likelihood."""
-    N = len(y)
-    return (tx.T @ (sigmoid(tx @ w) - y))/N
+    return tx.T @ (sigmoid(tx @ w) - y)

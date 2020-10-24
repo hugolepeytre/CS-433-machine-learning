@@ -126,3 +126,18 @@ def cross_validation_visualization(values, losses_t, losses_v, logspace=True):
     plt.legend(loc=2)
     plt.grid(True)
     plt.show()
+
+    plt.figure()
+    if logspace:
+        plt.semilogx(values, losses_t, marker=".", color='b', label='Train error')
+        plt.semilogx(values, losses_v, marker=".", color='r', label='Test error')
+    else:
+        plt.plot(values, losses_t, marker=".", color='b', label='Train error')
+        plt.plot(values, losses_v, marker=".", color='r', label='Test error')
+    plt.xlabel("Values")
+    plt.ylabel("Test error")
+    plt.title("Cross Validation between 0 and 1")
+    plt.ylim(0, 1)
+    plt.legend(loc=2)
+    plt.grid(True)
+    plt.show()
