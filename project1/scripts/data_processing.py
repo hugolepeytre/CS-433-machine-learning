@@ -1,10 +1,5 @@
 import numpy as np
 
-# from proj1_helpers import *
-# DATA_TRAIN_PATH = '../data/train.csv'
-# y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
-
-
 def set_nan(tX):
     """
     Label the -999 values as NaN
@@ -41,10 +36,12 @@ def filter_nan(y, tX, ids, remove=True, replace_val=0):
         # Remove the rows containing any NaN
         row_mask = ~mask.any(axis=1) # sets to False any rows containing NaN
         tX_copy, y_copy, ids_copy = tX_copy[row_mask], y_copy[row_mask], ids_copy[row_mask]
+        # Remove 0 filled columns
+        col_mask = tX_copy.sum(axis=0) != 0 # True if the columns is filled with 0
+        tX_copy = tX_copy[:, col_mask] 
     else:
         # Replace NaN values by replace_val
         tX_copy[mask] = replace_val
-        
     return y_copy, tX_copy, ids_copy
 
 
@@ -52,8 +49,7 @@ def remove_outliers(y, tX, ids):
     """
     Remove outliers feature points using Interquartile range.
     """
-    print("""TODO: only remove outliers when max - min > threshold like 10
-    Doubt with DER_deltar_tau_lep and PRI_jet_all_pt""")
+
     y_copy, tX_copy, ids_copy = copy_data(y, tX, ids)
     # Compute first and third quartiles and the Interquartile range
     Q1 = np.percentile(tX_copy, 25, axis=0) 
@@ -149,9 +145,8 @@ def clean_training(y, tX, ids):
     y, tX, ids = filter_nan(y, tX, ids, remove=False, replace_val=0.0)
     y, tX, ids = remove_outliers(y, tX, ids)
     tX = scale(tX, method="standard")[0]
-    print(tX.shape)
     y, tX, ids = remove_outliers(y, tX, ids)
-    print(tX.shape)
+    tX = np.c_[np.ones(len(tX)), tX]
     # tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
     return y, tX, ids
 
@@ -161,5 +156,40 @@ def clean_test(y, tX, ids):
     tX_columns = remove_empty_columns(tX_nan, threshold=2)  # Temporary to 2 to not remove any column
     y, tX, ids = filter_nan(y, tX_columns, ids, remove=False, replace_val=0.0)
     tX = scale(tX, method="standard", tX_test=tX)[1]
-    tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
+    # tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
+    tX = np.c_[np.ones(len(tX)), tX]
     return y, tX, ids
+
+def group_by_cat(y, tX, ids):
+    """
+    Return subsets (4 in fact) of the datasets, grouped by the category (PRI_jet_num feature).
+    One subset will group features with category 0, another one 1 etc.
+    """
+    NB_CATEGORY = 4 
+    #Column index of the categorical feature
+    IDX_COL_CAT = np.where((tX.max(axis=0) - tX.min(axis=0))  == 3)[0][0]
+    Y = []
+    X = []
+    IDS = []
+    for i in range(NB_CATEGORY):
+        row_idx = np.where(tX[:,IDX_COL_CAT] == i)[0] #index of the rows in category i
+        tX_cat = np.delete(tX[row_idx], IDX_COL_CAT, axis=1) #Remove category feature
+        tX_cat = np.c_[np.ones(len(tX_cat)), tX_cat] #Add bias
+        Y.append(y[row_idx])
+        X.append(tX_cat) 
+        IDS.append(ids[row_idx])
+    return Y, X, IDS
+
+def clean_by_cat(y, tX, ids):
+    Y, X, IDS = group_by_cat(y, tX, ids)
+
+    for i in range(len(Y)):
+        y_cat, tX_cat, ids_cat = Y[i], X[i], IDS[i]
+        tX_cat = set_nan(tX_cat)
+        tX_cat = remove_empty_columns(tX_cat, threshold=0.4)  #Remove any columns containing r
+        y_cat, tX_cat, ids_cat = filter_nan(y_cat, tX_cat, ids_cat, remove=True) #Remove rows containing NaN
+        y_cat, tX_cat, ids_cat = remove_outliers(y_cat, tX_cat, ids_cat)
+        tX_cat = scale(tX_cat, method="standard")[0]
+        # y, tX, ids = remove_outliers(y, tX, ids)
+        Y[i], X[i], IDS[i] = y_cat, tX_cat, ids_cat
+    return Y, X, IDS
