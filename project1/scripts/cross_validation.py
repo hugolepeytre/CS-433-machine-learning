@@ -27,31 +27,35 @@ def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, in
     # split data in k fold
     k_indices = build_k_indices(y.shape[0], k_fold, seed)
     # define lists to store the loss of training data and test data
-    losses_t = []
-    losses_v = []
+    accuracies_v = []
+    accuracies_t = []
 
     for v in values:
-        loss_t_avg = 0
-        loss_v_avg = 0
+        accuracy_t_avg = 0
+        accuracy_v_avg = 0
         for k in range(k_fold):
             if param == 'max_iters':
-                loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, v, gamma, lambda_, poly_exp)
+                accuracy_t, accuracy_v = cross_validation(y, tx, k_indices, k, model,
+                                                          initial_w, v, gamma, lambda_, poly_exp)
             elif param == 'gamma':
-                loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, v, lambda_, poly_exp)
+                accuracy_t, accuracy_v = cross_validation(y, tx, k_indices, k, model,
+                                                          initial_w, max_iters, v, lambda_, poly_exp)
             elif param == 'lambda_':
-                loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, v, poly_exp)
+                accuracy_t, accuracy_v = cross_validation(y, tx, k_indices, k, model,
+                                                          initial_w, max_iters, gamma, v, poly_exp)
             elif param == 'poly_exp':
-                loss_t, loss_v = cross_validation(y, tx, k_indices, k, model, initial_w, max_iters, gamma, lambda_, v)
+                accuracy_t, accuracy_v = cross_validation(y, tx, k_indices, k, model,
+                                                          initial_w, max_iters, gamma, lambda_, v)
             else:
                 raise ValueError('Invalid parameter')
-            loss_t_avg += loss_t
-            loss_v_avg += loss_v
-        losses_t.append(loss_t_avg/k_fold)
-        losses_v.append(loss_v_avg/k_fold)
+            accuracy_t_avg += accuracy_t
+            accuracy_v_avg += accuracy_v
+        accuracies_t.append(accuracy_t_avg/k_fold)
+        accuracies_v.append(accuracy_v_avg/k_fold)
 
-    cross_validation_visualization(values, losses_t, losses_v, logspace=logspace)
-    best_index = np.argmin(losses_v)
-    return values[best_index], losses_v[best_index]
+    cross_validation_visualization(values, accuracies_t, accuracies_v, logspace=logspace)
+    best_index = np.argmax(accuracies_v)
+    return values[best_index], accuracies_v[best_index]
 
 
 def build_k_indices(N, k_fold, seed=1):
@@ -96,48 +100,37 @@ def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, g
     y_t = y[training_indices]
     # Model the data
     w, loss_t = model_data(y_t, tx_t, model, initial_w, max_iters, gamma, lambda_)
-    # Validation loss
-    if 'logistic' in model:
-        loss_v = get_log_likelihood(y_v, tx_v, w)
-    else:
-        loss_v = get_loss(y_v, tx_v, w)
-    return loss_t, loss_v
+    # Compute accuracies
+    train_predictions = 2*(((tx_t @ w) > 0) - .5)
+    test_predictions = 2*(((tx_v @ w) > 0) - .5)
+    # print(len(train_predictions))
+    # print(len(test_predictions))
+    train_accuracy = np.mean(y_t == train_predictions)
+    test_accuracy = np.mean(y_v == test_predictions)
+    # print(train_accuracy - test_accuracy)
+    return train_accuracy, test_accuracy
 
 
-def cross_validation_visualization(values, losses_t, losses_v, logspace=True):
+def cross_validation_visualization(values, train_results, test_results, logspace=True):
     """
     Visualizes the training and validation error for all tested parameters
     :param values: Tested parameters
-    :param losses_t: Training losses
-    :param losses_v: Validation losses
+    :param train_results: Training losses
+    :param test_results: Validation losses
     :param logspace: If false, tested values are on a linear scale. Else they are on a log scale
     :return:
     """
     plt.figure()
     if logspace:
-        plt.semilogx(values, losses_t, marker=".", color='b', label='Train error')
-        plt.semilogx(values, losses_v, marker=".", color='r', label='Test error')
+        plt.semilogx(values, train_results, marker=".", color='b', label='Train accuracy')
+        plt.semilogx(values, test_results, marker=".", color='r', label='Test accuracy')
     else:
-        plt.plot(values, losses_t, marker=".", color='b', label='Train error')
-        plt.plot(values, losses_v, marker=".", color='r', label='Test error')
+        plt.plot(values, train_results, marker=".", color='b', label='Train accuracy')
+        plt.plot(values, test_results, marker=".", color='r', label='Test accuracy')
     plt.xlabel("Values")
     plt.ylabel("Test error")
-    plt.title("Cross Validation")
-    plt.legend(loc=2)
-    plt.grid(True)
-    plt.show()
-
-    plt.figure()
-    if logspace:
-        plt.semilogx(values, losses_t, marker=".", color='b', label='Train error')
-        plt.semilogx(values, losses_v, marker=".", color='r', label='Test error')
-    else:
-        plt.plot(values, losses_t, marker=".", color='b', label='Train error')
-        plt.plot(values, losses_v, marker=".", color='r', label='Test error')
-    plt.xlabel("Values")
-    plt.ylabel("Test error")
-    plt.title("Cross Validation between 0 and 1")
     plt.ylim(0, 1)
+    plt.title("Cross Validation")
     plt.legend(loc=2)
     plt.grid(True)
     plt.show()

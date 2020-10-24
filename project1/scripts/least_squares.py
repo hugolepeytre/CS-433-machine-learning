@@ -9,5 +9,4 @@ def least_squares(y, tx):
     """
     
     w, _, r, _ = np.linalg.lstsq(tx.T @ tx, tx.T @ y, rcond=None)
-    print("Rank of the matrix is {}, for D = {}".format(r, tx.shape[1]))
     return w, compute_loss(y, tx, w)
