@@ -1,9 +1,10 @@
 import numpy as np
-from helpers import *
+from helpers import batch_iter
 
 
-def gradient_descent(y, tx, initial_w, max_iters, gamma):
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """
+    Linear regression using gradient descent
     :param y: Labels, dim: N
     :param tx: Feature points, dim: NxD
     :param initial_w: Initial weights, dim: D
@@ -20,8 +21,9 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 
-def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """
+    Linear regression using stochastic gradient descent
     :param y: Labels
     :param tx: Feature points
     :param initial_w: Initial weights
@@ -32,8 +34,8 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma):
     batch_size = 1
     w = initial_w
 
-    # batch_iter can only send out each element once, so for a big amount of iterations or big batches, we have to
-    # repeat the function call
+    # batch_iter can only send out each element once, so for a big amount 
+    # of iterations or big batches, we have to repeat the function call
     max_num_batches = y.shape[0]//batch_size
     if max_iters <= max_num_batches:
         n_batches = max_iters
@@ -53,6 +55,7 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma):
 
 def least_squares(y, tx):
     """
+    Least squares regression using normal equations
     :param y: Labels
     :param tx: Feature vector
     :return: (w, loss), the optimal weight vector found, and the training loss
@@ -64,6 +67,7 @@ def least_squares(y, tx):
 
 def ridge_regression(y, tx, lambda_):
     """
+    Ridge regression using normal equations
     :param y: Labels
     :param tx: Feature points
     :param lambda_: Regularization parameter
@@ -76,6 +80,7 @@ def ridge_regression(y, tx, lambda_):
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
+    Logistic regression using gradient descent or SGD
     :param y: Labels
     :param tx: Feature points
     :param initial_w: Initial weight vector
@@ -95,7 +100,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
-    Trains a regularized logistic regression model
+    Regularized logistic regression using gradient descent or SGD
     :param y: Labels
     :param tx: Feature points
     :param lambda_: Regularization parameter
@@ -148,15 +153,14 @@ def compute_mse(y, tx, w):
 
 def sigmoid(t):
     """apply the sigmoid function on t."""
-    inv_exp = np.exp(-t)
-    return 1/(inv_exp+1)
+    return 1 / (1 + np.exp(-t))
 
 
 def compute_log_likelihood(y, tx, w):
     """compute the negative log likelihood."""
-    prediction = tx @ w
-    sum_logs = np.log(np.exp(prediction) + 1).sum()
-    error = -y.T @ prediction
+    eta = tx @ w
+    sum_logs = np.log(np.exp(eta) + 1).sum()
+    error = -y.T @ eta
     return sum_logs + error
 
 
