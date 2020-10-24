@@ -16,9 +16,8 @@ def remove_empty_columns(tX, threshold=0.4):
     tX_copy = np.copy(tX)
     # For each column compute the ratio of nan values over the number of rows
     prop_empty_column = (np.isnan(tX_copy)).sum(axis=0) / len(tX_copy)
-    
     column_mask = prop_empty_column < threshold
-    return tX_copy[:, column_mask]
+    return tX_copy[:, column_mask], column_mask
 
 
 def copy_data(y, tX, ids):
@@ -28,6 +27,7 @@ def copy_data(y, tX, ids):
 def filter_nan(y, tX, ids, remove=True, replace_val=0):
     """
     Filter the nan (-999) values, by either removing the rows or replacing by the specified replace_val.
+    Remove as well 0 filled columns when remove is set to True
     """   
     y_copy, tX_copy, ids_copy = copy_data(y, tX, ids)
     mask = np.isnan(tX_copy)  # True if Nan, False otherwise
@@ -39,10 +39,12 @@ def filter_nan(y, tX, ids, remove=True, replace_val=0):
         # Remove 0 filled columns
         col_mask = tX_copy.sum(axis=0) != 0 # True if the columns is filled with 0
         tX_copy = tX_copy[:, col_mask] 
+        return y_copy, tX_copy, ids_copy, col_mask
     else:
         # Replace NaN values by replace_val
         tX_copy[mask] = replace_val
-    return y_copy, tX_copy, ids_copy
+        return y_copy, tX_copy, ids_copy
+    
 
 
 def remove_outliers(y, tX, ids):
@@ -81,30 +83,30 @@ def noncategorical_columns(tX):
 
 def scale(tX, method="standard", tX_test=None):
     """
-    Scale noncategorical features using the specified method. Possible methods: standard, min-max
+    Scale features using the specified method. Possible methods: standard, min-max
     """
     tX_copy = np.copy(tX)
-    noncategorical_col = noncategorical_columns(tX_copy)
-    tX_noncat = tX_copy[:, noncategorical_col]
-    
     tX_test_copy = None
     if tX_test is not None:
         tX_test_copy = np.copy(tX_test)
-        noncategorical_col_test = noncategorical_columns(tX_test_copy)
 
     if method == "standard": 
         # Standardize the data
-        tX_copy[:, noncategorical_col] = (tX_noncat - tX_noncat.mean(axis=0)) / tX_noncat.std(axis=0)
+        mean = tX.mean(axis=0)
+        std = tX.std(axis=0)
+        std[std == 0] = 1 # No division by 0
+        tX_copy = (tX - mean) / std
         if tX_test is not None:
-            tX_test_copy[:, noncategorical_col_test] = (tX_noncat - tX_noncat.mean(axis=0)) / tX_noncat.std(axis=0)
+            tX_test_copy = (tX_test - mean) / std
 
     else:
         # Apply a min-max normalization to scale data between 0 and 1
-        col_min = tX_noncat.min(axis=0)
-        col_max = tX_noncat.max(axis=0)
-        tX_copy[:, noncategorical_col] = (tX_noncat - col_min) / (col_max - col_min)
+        col_min = tX.min(axis=0)
+        col_max = tX.max(axis=0)
+        col_range = col_max - col_min
+        tX_copy = (tX - col_min) / col_range
         if tX_test is not None:
-            tX_test_copy[:, noncategorical_col_test] = (tX_noncat - tX_noncat.mean(axis=0)) / tX_noncat.std(axis=0)
+            tX_test_copy = (tX_test - col_min) / col_range
    
     return tX_copy, tX_test_copy
 
@@ -151,11 +153,11 @@ def clean_training(y, tX, ids):
     return y, tX, ids
 
 
-def clean_test(y, tX, ids):
+def clean_test(y, tX, ids, tX_train):
     tX_nan = set_nan(tX)
     tX_columns = remove_empty_columns(tX_nan, threshold=2)  # Temporary to 2 to not remove any column
     y, tX, ids = filter_nan(y, tX_columns, ids, remove=False, replace_val=0.0)
-    tX = scale(tX, method="standard", tX_test=tX)[1]
+    tX = scale(tX_train[:,1:], method="standard", tX_test=tX)[1] # Scale test set with train set statistics
     # tX = remove_correlated_features(tX, handpicked=29, threshold=0.9)
     tX = np.c_[np.ones(len(tX)), tX]
     return y, tX, ids
@@ -174,22 +176,46 @@ def group_by_cat(y, tX, ids):
     for i in range(NB_CATEGORY):
         row_idx = np.where(tX[:,IDX_COL_CAT] == i)[0] #index of the rows in category i
         tX_cat = np.delete(tX[row_idx], IDX_COL_CAT, axis=1) #Remove category feature
-        tX_cat = np.c_[np.ones(len(tX_cat)), tX_cat] #Add bias
         Y.append(y[row_idx])
         X.append(tX_cat) 
         IDS.append(ids[row_idx])
     return Y, X, IDS
 
-def clean_by_cat(y, tX, ids):
-    Y, X, IDS = group_by_cat(y, tX, ids)
 
-    for i in range(len(Y)):
-        y_cat, tX_cat, ids_cat = Y[i], X[i], IDS[i]
-        tX_cat = set_nan(tX_cat)
-        tX_cat = remove_empty_columns(tX_cat, threshold=0.4)  #Remove any columns containing r
-        y_cat, tX_cat, ids_cat = filter_nan(y_cat, tX_cat, ids_cat, remove=True) #Remove rows containing NaN
-        y_cat, tX_cat, ids_cat = remove_outliers(y_cat, tX_cat, ids_cat)
-        tX_cat = scale(tX_cat, method="standard")[0]
-        # y, tX, ids = remove_outliers(y, tX, ids)
-        Y[i], X[i], IDS[i] = y_cat, tX_cat, ids_cat
-    return Y, X, IDS
+def clean_by_cat(y_train, tX_train, ids_train, y_test, tX_test, ids_test):
+    Y_train, X_train, IDS_train = group_by_cat(y_train, tX_train, ids_train)
+    Y_test, X_test, IDS_test = group_by_cat(y_test, tX_test, ids_test)
+
+    for i in range(len(Y_train)):
+        # Get the right category
+        y_cat_train, tX_cat_train, ids_cat_train = Y_train[i], X_train[i], IDS_train[i]
+        y_cat_test, tX_cat_test, ids_cat_test = Y_test[i], X_test[i], IDS_test[i]
+
+        #Set -999 to NaN
+        tX_cat_train = set_nan(tX_cat_train)
+        tX_cat_test = set_nan(tX_cat_test)
+
+        #Remove the (same) empty columns in the training and test
+        tX_cat_train, column_mask = remove_empty_columns(tX_cat_train, threshold=0.4) 
+        tX_cat_test = tX_cat_test[:, column_mask]
+
+        #Process NaN, remove rows in training or set to 0 in test
+        y_cat_train, tX_cat_train, ids_cat_train, column_mask = filter_nan(y_cat_train, tX_cat_train, ids_cat_train)
+        y_cat_test, tX_cat_test, ids_cat_test = filter_nan(y_cat_test, tX_cat_test, ids_cat_test, remove=False)
+        tX_cat_test = tX_cat_test[:,column_mask] #If 0 filled columns were removed in training, remove the same in test
+
+        #Remove outliers
+        y_cat_train, tX_cat_train, ids_cat_train = remove_outliers(y_cat_train, tX_cat_train, ids_cat_train)
+
+        #Scale training set and test set (using training set statistics)
+        tX_cat_train, tX_cat_test = scale(tX_cat_train, method="standard", tX_test=tX_cat_test) 
+        
+        # Add bias
+        tX_cat_train = np.c_[np.ones(len(tX_cat_train)), tX_cat_train] 
+        tX_cat_test = np.c_[np.ones(len(tX_cat_test)), tX_cat_test] 
+
+        #Assign new values
+        Y_train[i], X_train[i], IDS_train[i] = y_cat_train, tX_cat_train, ids_cat_train
+        Y_test[i], X_test[i], IDS_test[i] = y_cat_test, tX_cat_test, ids_cat_test
+    
+    return Y_train, X_train, IDS_train, Y_test, X_test, IDS_test
