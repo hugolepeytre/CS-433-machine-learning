@@ -129,7 +129,7 @@ def cross_validation_visualization(values, train_results, test_results, logspace
         plt.plot(values, test_results, marker=".", color='r', label='Test accuracy')
     plt.xlabel("Values")
     plt.ylabel("Test error")
-    plt.ylim(0, 1)
+    #plt.ylim(0.7, 1)
     plt.title("Cross Validation")
     plt.legend(loc=2)
     plt.grid(True)
