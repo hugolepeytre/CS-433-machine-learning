@@ -70,17 +70,6 @@ def remove_outliers(y, tX, ids):
 
     return y_copy[row_mask], tX_copy[row_mask], ids_copy[row_mask]
 
-
-def noncategorical_columns(tX):
-    """
-    Computes the columns with more that 10 unique values
-    """
-    # count the number of unique values
-    nunique_col = (np.diff(np.sort(tX, axis=0), axis=0) != 0).sum(axis=0) + 1 
-    noncategorical_col = nunique_col > 10  # set to True columns with more than 10 unique elements
-    return noncategorical_col
-
-
 def scale(tX, method="standard", tX_test=None):
     """
     Scale features using the specified method. Possible methods: standard, min-max
@@ -111,23 +100,14 @@ def scale(tX, method="standard", tX_test=None):
     return tX_copy, tX_test_copy
 
 
-def remove_correlated_features(tX, handpicked=-1, threshold=0.9):
+def remove_correlated_features(tX, threshold=0.9):
     """
     Compute the correlations between each feature and remove features that have a correlation greater
     than the specified threshold
     """
-    if handpicked != -1:
-        columns = np.full((tX.shape[1],), True, dtype=bool)
-        columns[handpicked] = False
-        return tX[:, columns]
-
     tX_copy = np.copy(tX)
-    noncategorical_col = noncategorical_columns(tX_copy)
-    cat_idx = np.where(~noncategorical_col)[0]  # Index of non categorical features
-    tX_noncat = tX_copy[:, noncategorical_col]
     
-    corr_matrix = np.corrcoef(tX_noncat, rowvar=False)
-    
+    corr_matrix = np.corrcoef(tX_copy, rowvar=False)
     # Set to False highly correlated columns
     nb_col = len(corr_matrix)
     columns = np.full((nb_col,), True, dtype=bool)
@@ -138,7 +118,7 @@ def remove_correlated_features(tX, handpicked=-1, threshold=0.9):
                     columns[j] = False
     
     # Remove correlated features and concat categorical features
-    return np.c_[tX_noncat[:, columns], tX_copy[:, cat_idx]]
+    return tX_copy[:, columns], columns
 
 
 def clean_training(y, tX, ids):
@@ -196,7 +176,7 @@ def clean_by_cat(y_train, tX_train, ids_train, y_test, tX_test, ids_test):
         tX_cat_test = set_nan(tX_cat_test)
 
         #Remove the (same) empty columns in the training and test
-        tX_cat_train, column_mask = remove_empty_columns(tX_cat_train, threshold=0.4) 
+        tX_cat_train, column_mask = remove_empty_columns(tX_cat_train, threshold=0.5)
         tX_cat_test = tX_cat_test[:, column_mask]
 
         #Process NaN, remove rows in training or set to 0 in test
@@ -208,11 +188,11 @@ def clean_by_cat(y_train, tX_train, ids_train, y_test, tX_test, ids_test):
         y_cat_train, tX_cat_train, ids_cat_train = remove_outliers(y_cat_train, tX_cat_train, ids_cat_train)
 
         #Scale training set and test set (using training set statistics)
-        tX_cat_train, tX_cat_test = scale(tX_cat_train, method="standard", tX_test=tX_cat_test) 
-        
+        tX_cat_train, tX_cat_test = scale(tX_cat_train, method="standard", tX_test=tX_cat_test)
+
         # Add bias
-        tX_cat_train = np.c_[np.ones(len(tX_cat_train)), tX_cat_train] 
-        tX_cat_test = np.c_[np.ones(len(tX_cat_test)), tX_cat_test] 
+        tX_cat_train = np.c_[np.ones(len(tX_cat_train)), tX_cat_train]
+        tX_cat_test = np.c_[np.ones(len(tX_cat_test)), tX_cat_test]
 
         #Assign new values
         Y_train[i], X_train[i], IDS_train[i] = y_cat_train, tX_cat_train, ids_cat_train
