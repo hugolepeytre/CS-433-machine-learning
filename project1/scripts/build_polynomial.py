@@ -11,9 +11,9 @@ def build_poly(x, degree):
     :param degree: Maximum power to raise x to
     :return: Matrix of dimensions (len(x), degree + 1), with column i being x^i
     """
-    result = np.ones(len(x))
-    current = np.ones(len(x))
-    for i in range(degree):
+    result = x
+    current = x
+    for i in range(degree - 1):
         current = current*x
         result = np.vstack([result, current])
     return result.T
@@ -26,4 +26,6 @@ def build_poly_2D(x, degree):
     :param degree: Maximum power to raise x to
     :return: Matrix of dimensions (x.shape[0], x.shape[1] * (degree + 1))
     """
-    return np.hstack([build_poly(column, degree) for column in x.T])
+    # We don't  do the expansion on the bias column
+    expanded_features = np.hstack([build_poly(column, degree) for column in x.T[1:]])
+    return np.c_[x[:, 0], expanded_features]
