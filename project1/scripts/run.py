@@ -8,8 +8,8 @@ DATA_TRAIN_PATH = DATA_FOLDER + 'train.csv'
 DATA_TEST_PATH = DATA_FOLDER + 'test.csv'
 
 # Parameters of ridge regression
-RIDGE_DEGREES = [5, 5, 5, 9]
-RIDGE_LAMBDA_ = 0.0003
+RIDGE_DEGREES = [2, 2, 2, 2]
+RIDGE_LAMBDAS = [0.00027, 0.00019, 0.001, 1.3e-5]
 
 # Parameters of logistic regression
 LOGISTIC_GAMMAS = [0.1179, 0.0848, 0.1179, 0.0610]
@@ -29,7 +29,7 @@ def fit_ridge(y, x, ids):
     losses = []
     for i in range(len(y)):
         y_cat, tx_cat, ids_cat = y[i], x[i], ids[i]
-        w, loss = model_data(y_cat, tx_cat, 'ridge_regression', poly_exp=RIDGE_DEGREES[i], lambda_=RIDGE_LAMBDA_)
+        w, loss = model_data(y_cat, tx_cat, 'ridge_regression', poly_exp=RIDGE_DEGREES[i], lambda_=RIDGE_LAMBDAS[i])
         ws.append(w)
         losses.append(loss)
     return ws

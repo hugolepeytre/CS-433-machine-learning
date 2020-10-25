@@ -4,7 +4,7 @@ import csv
 from costs import sigmoid
 
 
-def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True, seed=42):
     """
     Returns an iterator on splits of the original x and y (shuffled the same way)
     If num_batches*batch_size is bigger that the number of elements, the last elements of the
@@ -16,6 +16,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     :param shuffle: If False, array is not shuffled before being split
     :return: An iterator on shuffled splits of the original x and y
     """
+    np.random.seed(seed)
     data_size = len(y)
 
     if shuffle:
