@@ -18,7 +18,7 @@ def compute_loss(y, tx, w, loss_function='mse'):
         return e @ e / (2 * N)
     elif loss_function == 'mae':
         return np.abs(e).mean()
-    elif loss_function == 'log_likelihood':
+    elif loss_function == 'log-likelihood':
         sum_logs = np.log(np.exp(prediction) + 1).sum()
         error = -y.T @ prediction
         return (sum_logs + error) / N

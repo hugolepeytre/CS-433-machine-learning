@@ -30,5 +30,37 @@ This folder contains several python modules, categorized as follows :
 - __init__.py : Empty file used to have imports work on all systems
 
 ## 2 - Final model presentation :
+### Data Processing
+Our data processing pipeline includes the following things :
+- Setting -999 values to NaN
+- Splitting the set into 4 categories depending on the value of PRI_jet_num feature
+- For each split:
+- - Removing the columns full of NaN
+  - Filter out the rows containing NaNs (or set NaN to 0 in test set)
+  - Remove outliers
+  - Standardize the data
+
+### Models and hyperparameters
+Our run.py includes two different models, since they had very close accuracies in our fine-tuning
+and we wanted to try them both on AICrowd :
+
+#### Model 1 : Ridge regression
+This is a ridge regression model on polynomial expansion of the features using :
+lambda = 3*10^(-4)
+polynomial expansion degrees = 5, 5, 5, 9 (for each category in order)
+
+#### Model 2 : Logistic regression
+This is a logistic regression model on polynomial expansion of the features using :
+gammas = 0.14, 0.08, 0.14, 0.08 (for each category in order)
+number of iterations = 600
+polynomial expansion degree = 3
 
 ## 3 - run.py script usage :
+The script should be in the scripts folder with all the other modules from the zip file,
+and you should put the test.csv and train.csv files in it.
+Then, opening a terminal and running the command
+'python run.py ridge_regression' or 'python3 run.py ridge_regression'
+should output a submission.csv file in the folder, that represents our prediction for the ridge regression model
+while the command
+'python run.py ridge_regression' or 'python3 run.py ridge_regression'
+should output our prediction for the logistic regression model
