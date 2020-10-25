@@ -3,7 +3,7 @@ from data_processing import clean_by_cat
 from pipeline import *
 import sys
 
-DATA_FOLDER = '../data/'
+DATA_FOLDER = ''
 DATA_TRAIN_PATH = DATA_FOLDER + 'train.csv'
 DATA_TEST_PATH = DATA_FOLDER + 'test.csv'
 

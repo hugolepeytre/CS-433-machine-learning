@@ -56,11 +56,11 @@ number of iterations = 600
 polynomial expansion degree = 3
 
 ## 3 - run.py script usage :
-The script should be in the scripts folder with all the other modules from the zip file, and there should
-be a data folder next to the scripts folders (unzipping the given file will do everything correctly)
+The script should be in the scripts folder with all the other modules from the zip file,
+and you should put the test.csv and train.csv files in it.
 Then, opening a terminal and running the command
 'python run.py ridge_regression' or 'python3 run.py ridge_regression'
-should output a submission.csv file in the data folder, that represents our prediction for the ridge regression model
+should output a submission.csv file in the folder, that represents our prediction for the ridge regression model
 while the command
 'python run.py ridge_regression' or 'python3 run.py ridge_regression'
 should output our prediction for the logistic regression model
