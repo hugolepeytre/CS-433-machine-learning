@@ -14,7 +14,7 @@ DATA_TRAIN_PATH = DATA_FOLDER + 'train.csv'
 DATA_TEST_PATH = DATA_FOLDER + 'test.csv'
 
 # Parameters of ridge regression
-DEGREES = [5, 15, 5, 9]
+DEGREES = [5, 5, 5, 9]
 LAMBDA_ = 0.0003
 
 # Parameters of logistic regression
