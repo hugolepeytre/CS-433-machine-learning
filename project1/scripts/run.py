@@ -12,9 +12,9 @@ RIDGE_DEGREES = [5, 5, 5, 9]
 RIDGE_LAMBDA_ = 0.0003
 
 # Parameters of logistic regression
-LOGISTIC_GAMMAS = [0.14, 0.08, 0.14, 0.08]
-LOGISTIC_DEGREE = 3
-LOGISTIC_MAX_ITERS = 600
+LOGISTIC_GAMMAS = [0.1179, 0.0848, 0.1179, 0.0610]
+LOGISTIC_DEGREES = [3, 2, 3, 3]
+LOGISTIC_MAX_ITERS = 1000
 
 
 def fit_ridge(y, x, ids):
@@ -48,7 +48,7 @@ def fit_logistic(y, x, ids):
     for i in range(len(y)):
         y_cat, tx_cat, ids_cat = y[i], x[i], ids[i]
         w, loss = model_data(y_cat, tx_cat, 'logistic_regression',
-                             poly_exp=LOGISTIC_DEGREE, gamma=LOGISTIC_GAMMAS[i], max_iters=LOGISTIC_MAX_ITERS)
+                             poly_exp=LOGISTIC_DEGREES[i], gamma=LOGISTIC_GAMMAS[i], max_iters=LOGISTIC_MAX_ITERS)
         ws.append(w)
         losses.append(loss)
     return ws
@@ -70,7 +70,7 @@ def prediction_by_cat(model, w, x, ids):
             tx_poly = build_poly_2D(tx_cat, RIDGE_DEGREES[i])
             prediction = predict_labels(w_cat, tx_poly)
         elif model == 'logistic_regression':
-            tx_poly = build_poly_2D(tx_cat, LOGISTIC_DEGREE)
+            tx_poly = build_poly_2D(tx_cat, LOGISTIC_DEGREES[i])
             prediction = predict_labels_logistic(w_cat, tx_poly)
         else:
             raise ValueError("Wrong arguments : only 'ridge_regression' or 'logistic_regression' are available")
