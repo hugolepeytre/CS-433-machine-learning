@@ -1,9 +1,10 @@
+"""Ridge Regression Model"""
 from costs import *
 
 
 def ridge_regression(y, tx, lambda_):
     """
-
+    Solves the ridge regression and returns the weight vector and loss
     :param y: Labels
     :param tx: Feature points
     :param lambda_: Regularization parameter
@@ -11,4 +12,5 @@ def ridge_regression(y, tx, lambda_):
     """
     lambda_p = 2 * len(y) * lambda_
     w = np.linalg.solve(tx.T @ tx + (lambda_p*np.eye(tx.shape[1])), tx.T @ y)
-    return w, compute_loss(y, tx, w)
+    loss = compute_loss(y, tx, w)
+    return w, loss

@@ -2,32 +2,9 @@ from helpers import *
 from costs import *
 
 
-def sigmoid(t):
-    """apply the sigmoid function on t."""
-    inv_exp = np.exp(-t)
-    return 1/(inv_exp+1)
-
-
-def calculate_gradient(y, tx, w):
-    """compute the gradient of loss."""
-    N = len(y)
-    return (tx.T @ (sigmoid(tx @ w) - y))/N
-
-
-def gradient_descent_step(y, tx, w, gamma):
-    """
-    Do one step of gradient descent using logistic regression.
-    Return the loss and the updated w.
-    """
-    loss = compute_log_likelihood(y, tx, w)
-    grad = calculate_gradient(y, tx, w)
-    w = w - gamma*grad
-    return loss, w
-
-
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
-
+    Performs a stochastic gradient descent on negative log-likelihood
     :param y: Labels
     :param tx: Feature points
     :param initial_w: Initial weight vector
@@ -50,5 +27,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
     for i in range(iterations):
         for y_batch, tx_batch in batch_iter(y, tx, batch_size, num_batches=n_batches):
-            loss, w = gradient_descent_step(y_batch, tx_batch, w, gamma)
+            loss = compute_loss(y_batch, tx_batch, w, 'log-likelihood')
+            grad = compute_gradient(y_batch, tx_batch, w, 'log-likelihood')
+            w = w - gamma * grad
     return w, loss

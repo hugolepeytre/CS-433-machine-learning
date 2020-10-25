@@ -53,7 +53,7 @@ def get_loss(y, tx, w):
     """
     Returns the mse
     """
-    return compute_loss(y, tx, w)
+    return compute_loss(y, tx, w, 'mse')
 
 
 def get_log_likelihood(y, tx, w):
@@ -62,4 +62,4 @@ def get_log_likelihood(y, tx, w):
     Takes care of the change in labels from {-1,-1} to {0,1}
     """
     y = y/2 + 0.5
-    return compute_log_likelihood(y, tx, w)
+    return compute_loss(y, tx, w, 'log-likelihood')

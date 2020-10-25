@@ -1,15 +1,9 @@
-import numpy as np
-
-from proj1_helpers import *
-from split_data import *
-from data_processing import *
-from pipeline import * 
-from cross_validation import *
-from split_data import *
+from helpers import *
+from data_processing import clean_by_cat
+from pipeline import *
 import sys
 
 DATA_FOLDER = '../data/'
-DATA_ZIP = DATA_FOLDER + 'datasets.zip'
 DATA_TRAIN_PATH = DATA_FOLDER + 'train.csv'
 DATA_TEST_PATH = DATA_FOLDER + 'test.csv'
 
@@ -23,52 +17,54 @@ DEGREE = 3
 MAX_ITERS = 600
 
 
-def fit_ridge(Y, X, IDS):
-    W = []
+def fit_ridge(y, x, ids):
+    ws = []
     losses = []
-    for i in range(len(Y)): 
-        y_cat, tX_cat, ids_cat = Y[i], X[i], IDS[i]
-        w, loss = model_data(y_cat, tX_cat, 'ridge_regression', poly_exp=DEGREES[i], lambda_=LAMBDA_)
-        W.append(w)
+    for i in range(len(y)):
+        y_cat, tx_cat, ids_cat = y[i], x[i], ids[i]
+        w, loss = model_data(y_cat, tx_cat, 'ridge_regression', poly_exp=DEGREES[i], lambda_=LAMBDA_)
+        ws.append(w)
         losses.append(loss)
-    return W
+    return ws
 
 
-def fit_logistic(Y, X, IDS):
-    W = []
+def fit_logistic(y, x, ids):
+    ws = []
     losses = []
-    for i in range(len(Y)):
-        y_cat, tX_cat, ids_cat = Y[i], X[i], IDS[i]
-        w, loss = model_data(y_cat, tX_cat, 'logistic_regression', poly_exp=DEGREE, gamma=GAMMAS[i], max_iters=MAX_ITERS)
-        W.append(w)
+    for i in range(len(y)):
+        y_cat, tx_cat, ids_cat = y[i], x[i], ids[i]
+        w, loss = model_data(y_cat, tx_cat, 'logistic_regression', poly_exp=DEGREE, gamma=GAMMAS[i], max_iters=MAX_ITERS)
+        ws.append(w)
         losses.append(loss)
-    return W
+    return ws
 
 
-def prediction_by_cat(model, W, X, IDS):
+def prediction_by_cat(model, w, x, ids):
+    # TODO : change
     y_pred = np.array([])
     ids_pred = np.array([])
-    for i, (w, tX, ids) in enumerate(zip(W, X, IDS)):
+    for i, (w_cat, tx_cat, ids_cat) in enumerate(zip(w, x, ids)):
         if model == 'ridge_regression':
-            tX_poly = build_poly_2D(tX, DEGREES[i])
+            tx_poly = build_poly_2D(tx_cat, DEGREES[i])
+            prediction = predict_labels(w, tx_poly)
         elif model == 'logistic_regression':
-            tX_poly = build_poly_2D(tX, DEGREE)
+            tx_poly = build_poly_2D(tx_cat, DEGREE)
+            prediction = predict_labels_logistic(w, tx_poly)
         else:
             raise ValueError("Wrong arguments : only 'ridge_regression' or 'logistic_regression' are available")
-        prediction = predict_labels(w, tX_poly)
         y_pred = np.concatenate((y_pred, prediction)) if len(y_pred) else prediction
         ids_pred = np.concatenate((ids_pred, ids)) if len(ids_pred) else ids
     return y_pred, ids_pred
 
 
-def create_by_cat_submission(model, Y_train, X_train, IDS_train, X_test, IDS_test):
+def create_by_cat_submission(model, y_train, x_train, ids_train, x_test, ids_test):
     if model == 'ridge_regression':
-        W = fit_ridge(Y_train, X_train, IDS_train)
+        w = fit_ridge(y_train, x_train, ids_train)
     elif model == 'logistic_regression':
-        W = fit_logistic(Y_train, X_train, IDS_train)
+        w = fit_logistic(y_train, x_train, ids_train)
     else:
         raise ValueError("Wrong arguments : only 'ridge_regression' or 'logistic_regression' are available")
-    y_pred, ids_pred = prediction_by_cat(model, W, X_test, IDS_test)
+    y_pred, ids_pred = prediction_by_cat(model, w, x_test, ids_test)
     OUTPUT_PATH = DATA_FOLDER + 'submission.csv'
     create_csv_submission(ids_pred, y_pred, OUTPUT_PATH)
 
@@ -77,11 +73,11 @@ def main():
     if (len(sys.argv) == 2) & ('regression' in str(sys.argv[1])):
         model = str(sys.argv[1])
         print("Loading training data...")
-        y_train, tX_train, ids_train = load_csv_data(DATA_TRAIN_PATH)
+        y_train, tx_train, ids_train = load_csv_data(DATA_TRAIN_PATH)
         print("Loading test data...")
-        y_test, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
+        y_test, tx_test, ids_test = load_csv_data(DATA_TEST_PATH)
         print("Cleaning the data...")
-        Y_train, X_train, IDS_train, Y_test, X_test, IDS_test = clean_by_cat(y_train, tX_train, ids_train, y_test, tX_test, ids_test)
+        Y_train, X_train, IDS_train, Y_test, X_test, IDS_test = clean_by_cat(y_train, tx_train, ids_train, y_test, tx_test, ids_test)
         print("Predicting the labels...")
         create_by_cat_submission(model, Y_train, X_train, IDS_train, X_test, IDS_test)
     else:

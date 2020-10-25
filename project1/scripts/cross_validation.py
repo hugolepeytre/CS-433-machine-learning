@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, initial_w=[], max_iters=1000, gamma=0.1,
                         lambda_=0.1, poly_exp=1, seed=1):
     """
-
+    Finds the best parameter among the given list, on the given model
     :param y: Labels
     :param tx: Feature vector
     :param model: Which machine learning model to use, argument should be the name as a string
@@ -69,8 +69,7 @@ def build_k_indices(N, k_fold, seed=1):
     interval = int(N / k_fold)
     np.random.seed(seed)
     indices = np.random.permutation(N)
-    k_indices = np.array([indices[k * interval:(k + 1) * interval]
-                          for k in range(k_fold)])
+    k_indices = np.array([indices[k * interval:(k + 1) * interval] for k in range(k_fold)])
     return k_indices
 
 
@@ -98,25 +97,24 @@ def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, g
     y_v = y[testing_indices]
     tx_t = tx[training_indices]
     y_t = y[training_indices]
+
     # Model the data
     w, loss_t = model_data(y_t, tx_t, model, initial_w, max_iters, gamma, lambda_)
+
     # Compute accuracies
     train_predictions = 2*(((tx_t @ w) > 0) - .5)
     test_predictions = 2*(((tx_v @ w) > 0) - .5)
-    # print(len(train_predictions))
-    # print(len(test_predictions))
     train_accuracy = np.mean(y_t == train_predictions)
     test_accuracy = np.mean(y_v == test_predictions)
-    # print(train_accuracy - test_accuracy)
     return train_accuracy, test_accuracy
 
 
 def cross_validation_visualization(values, train_results, test_results, logspace=True):
     """
-    Visualizes the training and validation error for all tested parameters
+    Visualizes the training and validation accuracy for all tested parameters
     :param values: Tested parameters
-    :param train_results: Training losses
-    :param test_results: Validation losses
+    :param train_results: Training accuracies
+    :param test_results: Validation accuracies
     :param logspace: If false, tested values are on a linear scale. Else they are on a log scale
     :return:
     """
@@ -128,8 +126,7 @@ def cross_validation_visualization(values, train_results, test_results, logspace
         plt.plot(values, train_results, marker=".", color='b', label='Train accuracy')
         plt.plot(values, test_results, marker=".", color='r', label='Test accuracy')
     plt.xlabel("Values")
-    plt.ylabel("Test error")
-    #plt.ylim(0.7, 1)
+    plt.ylabel("Accuracy")
     plt.title("Cross Validation")
     plt.legend(loc=2)
     plt.grid(True)
