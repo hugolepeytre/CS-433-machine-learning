@@ -1,6 +1,7 @@
 """Various helper functions, most were given during the labs"""
 import numpy as np
 import csv
+from costs import sigmoid
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
@@ -87,7 +88,7 @@ def predict_labels_logistic(weights, x):
     :param x: Feature points
     :return: Predictions
     """
-    y_pred = np.dot(x, weights)
+    y_pred = sigmoid(np.dot(x, weights))
     y_pred[np.where(y_pred <= 0.5)] = -1
     y_pred[np.where(y_pred > 0.5)] = 1
     return y_pred
