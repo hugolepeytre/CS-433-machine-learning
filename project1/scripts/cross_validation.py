@@ -1,8 +1,9 @@
 from pipeline import *
+from costs import sigmoid
 import matplotlib.pyplot as plt
 
 
-def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, initial_w=[], max_iters=1000, gamma=0.1,
+def find_best_parameter(y, tx, model, param, values, logspace=True, k_fold=4, initial_w=[], max_iters=200, gamma=0.1,
                         lambda_=0.1, poly_exp=1, seed=1):
     """
     Finds the best parameter among the given list, on the given model
@@ -102,10 +103,17 @@ def cross_validation(y, tx, k_indices, k, model, initial_w=[], max_iters=1000, g
     w, loss_t = model_data(y_t, tx_t, model, initial_w, max_iters, gamma, lambda_)
 
     # Compute accuracies
-    train_predictions = 2*(((tx_t @ w) > 0) - .5)
-    test_predictions = 2*(((tx_v @ w) > 0) - .5)
-    train_accuracy = np.mean(y_t == train_predictions)
-    test_accuracy = np.mean(y_v == test_predictions)
+    if 'logistic' in model:
+        train_predictions = 2*((sigmoid(tx_t @ w) > 0.5) - .5)
+        test_predictions = 2*((sigmoid(tx_v @ w) > 0.5) - .5)
+        train_accuracy = np.mean(y_t == train_predictions)
+        test_accuracy = np.mean(y_v == test_predictions)
+    else:
+        train_predictions = 2*(((tx_t @ w) > 0) - .5)
+        test_predictions = 2*(((tx_v @ w) > 0) - .5)
+        train_accuracy = np.mean(y_t == train_predictions)
+        test_accuracy = np.mean(y_v == test_predictions)
+
     return train_accuracy, test_accuracy
 
 
