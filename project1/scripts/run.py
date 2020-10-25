@@ -12,8 +12,8 @@ RIDGE_DEGREES = [5, 5, 5, 9]
 RIDGE_LAMBDA_ = 0.0003
 
 # Parameters of logistic regression
-LOGISTIC_GAMMAS = [0.14, 0.08, 0.14, 0.08]
-LOGISTIC_DEGREE = 3
+LOGISTIC_GAMMAS = [0.118, 0.085, 0.118, 0.061]
+LOGISTIC_DEGREES = [3, 2, 3, 3]
 LOGISTIC_MAX_ITERS = 600
 
 
@@ -48,7 +48,7 @@ def fit_logistic(y, x, ids):
     for i in range(len(y)):
         y_cat, tx_cat, ids_cat = y[i], x[i], ids[i]
         w, loss = model_data(y_cat, tx_cat, 'logistic_regression',
-                             poly_exp=LOGISTIC_DEGREE, gamma=LOGISTIC_GAMMAS[i], max_iters=LOGISTIC_MAX_ITERS)
+                             poly_exp=LOGISTIC_DEGREES[i], gamma=LOGISTIC_GAMMAS[i], max_iters=LOGISTIC_MAX_ITERS)
         ws.append(w)
         losses.append(loss)
     return ws
