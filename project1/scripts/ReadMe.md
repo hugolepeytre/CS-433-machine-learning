@@ -19,6 +19,9 @@ This folder contains several python modules, categorized as follows :
 - data_processing.py : Methods for data processing
 - build_polynomial.py : Performs polynomial expansion of the data
 
+### Hyperparameters tuning
+- fine_tuning.ipynb : Find the best hyper parameters through cross-validation
+
 ### Files needed for submission
 - implementations.py : Self-sufficient module containing the machine learning models created in lab sessions
 - run.py : Script used to produce our best prediction for the Higgs challenge. Usage is explained below
@@ -43,8 +46,7 @@ Our data processing pipeline includes the following things :
   - Standardize the data
 
 ### Models and hyperparameters
-Our run.py includes two different models, since they had very close accuracies in our fine-tuning
-and we wanted to try them both on AICrowd :
+Our run.py includes two different models, since they had very close accuracies in our fine-tuning (see fine-tuning.ipynb) and we wanted to try them both on AICrowd :
 
 #### Model 1 : Ridge regression
 This is a ridge regression model on polynomial expansion of the features using :
